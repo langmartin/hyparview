@@ -1,15 +1,16 @@
 #!/usr/bin/env gnuplot -c
 # title = ARG1
 # data = ARG2
-# last = ARG3
+# SIMULATION_COUNT = ARG3
 
 set title ARG1
 set xlabel ARG1
 set ylabel "Count Peers"
-set ytics "10"
+set ytics "50"
 set term png tiny
 
-file(n) = sprintf("data/%04d-".ARG2, n)
-file_lb(n) = sprintf("%04d-", n)
+
+file(n) = sprintf("data/%05d/%s", n, ARG2)
+file_lb(n) = sprintf("%05d/", n)
 
 plot for [i = 1:ARG3] file(i) with lines
