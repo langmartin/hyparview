@@ -9,8 +9,10 @@ set term png tiny
 set xlabel "Gossip Round"
 set ylabel "Messages"
 
+set logscale y 2
 set xrange [1:30]
-set yrange [0:10000]
+set yrange [0:100000]
 
-file(n) = sprintf("data/%04d-gossip", n)
+file(n) = sprintf("data/%05d/gossip", n)
+
 plot for [world=1:ARG1] for [col=2:4] file(world) using 1:col with lines title columnheader
