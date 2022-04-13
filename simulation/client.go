@@ -17,6 +17,7 @@ type Client struct {
 	appWaste       int // count of app messages that didn't change the value
 	shuffleTime    int
 	keepaliveTime  int
+	dead           bool
 }
 
 func makeClient(w *World, addr string) *Client {
@@ -42,7 +43,13 @@ func (c *Client) recv(m h.Message) *h.NeighborRefuse {
 	}
 }
 
+func (c *Client) shouldDie() bool {
+	return h.Rint(100) > c.w.config.mortality
+}
+
 func (c *Client) shouldFail() bool {
+	// Don't retry once, all failures are instantaneous. This can produce orphaned nodes
+	// under pretty modest failure rates.
 	// return h.Rint(100) < c.w.config.failureRate
 
 	// Retry
@@ -56,6 +63,10 @@ func (c *Client) shouldFail() bool {
 
 // Do the next state of the client
 func (c *Client) next() {
+	if c.dead {
+		return
+	}
+
 	if c.shuffleTime == 60 {
 		c.SendShuffle()
 		c.shuffleTime = -1

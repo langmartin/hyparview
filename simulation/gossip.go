@@ -19,7 +19,11 @@ func (r *gossip) AssocTo(n h.Node) h.Message {
 func (r *gossip) From() h.Node { return r.from }
 func (r *gossip) Type() string { return "gossip" }
 
-func (c *Client) gossip(i int) {
+func (c *Client) sendGossip(i int) {
+	if c.dead {
+		return
+	}
+
 	c.recvGossip(&gossip{to: c.Self, app: i, hops: 0})
 }
 

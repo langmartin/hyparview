@@ -1,6 +1,8 @@
-export SIMULATION_PEERS=1000
+export SIMULATION_PEERS=130
 export SIMULATION_COUNT=3
 export SIMULATION_SEED=
+export SIMULATION_NETWORK_FAILURE_PERCENT=0
+export SIMULATION_NODE_FAILURE_PERCENT=85
 
 simulation: ## run the simulation test
 	mkdir -p data
@@ -8,8 +10,8 @@ simulation: ## run the simulation test
 
 plot: ## make plots from simulation data
 	mkdir -p plot
-	./bin/plot-degree "In Degree" "in-active" $(SIMULATION_COUNT) > plot/in-degree.png
-	./bin/plot-all-gossip $(SIMULATION_COUNT) > plot/gossip.png
+	# ./bin/plot-all stacked degree $(SIMULATION_COUNT)
+	./bin/plot-stacked gossip $(SIMULATION_COUNT) > plot/gossip.png
 
 plot-slow: ## more plots, but these are slow
 	mkdir -p plot

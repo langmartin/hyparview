@@ -23,14 +23,7 @@ func simulation(c WorldConfig) *World {
 		me.SendJoin(w.bootstrap)
 	}
 
-	// log.Printf("debug: send some gossip messages")
-	// avoid panic when rounds > peers
-	rounds := c.payloads
-	if rounds > c.peers {
-		rounds = c.peers
-	}
-
-	for i := 0; i < c.gossips; i++ {
+	for i := 0; i < c.gossipMessages; i++ {
 		for _, c := range w.randNodes() {
 			c.next()
 		}
@@ -39,7 +32,7 @@ func simulation(c WorldConfig) *World {
 		// messages before returning. Also maintains the active view
 		node := w.get(makeID(rand.Intn(len(w.nodes))))
 		p := i + 1
-		node.gossip(p)
+		node.sendGossip(p)
 		w.traceRound(p)
 	}
 

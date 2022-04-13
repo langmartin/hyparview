@@ -1,0 +1,31 @@
+#!/usr/bin/env gnuplot -c
+set style data lines
+# set style histogram rowstacked
+# set boxwidth 1 relative
+# set style fill solid 1.0 border -1
+
+set datafile separator " "
+set term png tiny
+
+data1 = 'in_degree_active'
+data2 = 'out_degree_active'
+data3 = 'hyparview_messages'
+data4 = 'gossip_seen'
+data5 = 'gossip_waste'
+
+# set xrange [1:30]
+# set yrange [0:10000]
+
+# plot \
+# data1 using 1:col with lines lw 2 title "in_degree_active" \
+# data2 using 1:col with lines lw 2 title "out_degree_active" \
+# data3 using 1:col with lines lw 2 title "hyparview_messages" \
+# data4 using 1:col with lines lw 2 title "gossip_seen" \
+# data5 using 1:col with lines lw 2 title "gossip_waste"
+
+plot \
+data1 using 1:col with lines lw 2 title "in_degree_active" \
+data2 using 1:col with lines lw 2 title "out_degree_active" \
+data3 using 1:col with lines lw 2 title "hyparview_messages" \
+data4 using 1:col with lines lw 2 title "gossip_seen" \
+data5 using 1:col with lines lw 2 title "gossip_waste"

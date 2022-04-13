@@ -149,24 +149,13 @@ func (w *World) plotSeed(seed int64) {
 }
 
 func (w *World) plotBootstrapCount() {
-	max := 0
-	h := map[int]int{}
+	h := w.stats["bootstrap"]
+
 	for _, n := range w.randNodes() {
-		h[n.bootstrapCount] += 1
-		if n.bootstrapCount > max {
-			max = n.bootstrapCount
-		}
+		h.inc(n.bootstrapCount)
 	}
 
-	f, _ := os.Create(w.plotPath("bootstrap"))
-	defer f.Close()
-
-	// go in order to avoid map range
-	for i := 0; i <= max; i++ {
-		if c, ok := h[i]; ok {
-			f.WriteString(fmt.Sprintf("%d %d\n", i, c))
-		}
-	}
+	h.plot(w.plotPath("bootstrap"))
 }
 
 type getPart func(c *Client) *h.ViewPart
@@ -180,41 +169,28 @@ func passivePart(c *Client) *h.ViewPart {
 }
 
 func (w *World) plotOutDegree() {
-	plot := func(p getPart, path string) {
+	plot := func(p getPart, label string) {
 		act := map[string]int{}
 		for _, n := range w.randNodes() {
 			act[n.Self.Addr()] = p(n).Size()
 		}
 
-		max := 0
+		h := w.stats[label]
+
 		for _, outDegree := range act {
-			if outDegree > max {
-				max = outDegree
-			}
+			h.inc(outDegree)
 		}
 
-		deg := make([]int, max+1)
-		for _, outDegree := range act {
-			deg[outDegree] += 1
-		}
-
-		f, _ := os.Create(path)
-		defer f.Close()
-		for outDegree, peers := range deg {
-			if peers == 0 {
-				continue
-			}
-			f.WriteString(fmt.Sprintf("%d %d\n", outDegree, peers))
-		}
+		h.plot(w.plotPath(label))
 	}
 
-	plot(activePart, w.plotPath("out-active"))
-	plot(passivePart, w.plotPath("out-passive"))
+	plot(activePart, "out_degree_active")
+	plot(passivePart, "out_degree_passive")
 }
 
 func (w *World) plotGraphs() {
-	w.plotGraph("graph-active", activePart)
-	w.plotGraph("graph-passive", passivePart)
+	w.plotGraph("graph-active.dot", activePart)
+	w.plotGraph("graph-passive.dot", passivePart)
 }
 
 func (w *World) plotGraph(plotName string, part getPart) {
@@ -222,18 +198,22 @@ func (w *World) plotGraph(plotName string, part getPart) {
 	f, _ := os.Create(path)
 	defer f.Close()
 
-	row := "%s\t%s\n"
+	f.WriteString("digraph {\n")
+	f.WriteString("node[style=\"filled\" color=\"#5B4D8B\" shape=\"circle\" fontcolor=\"white\"]\n")
 
+	row := "\"%s\" -> \"%s\"\n"
 	for _, v := range w.randNodes() {
 		from := v.Self.Addr()
 		for _, n := range part(v).Nodes {
 			f.WriteString(fmt.Sprintf(row, from, n.Addr()))
 		}
 	}
+
+	f.WriteString("}\n")
 }
 
 func (w *World) plotInDegree() {
-	plot := func(part getPart, path string) {
+	plot := func(part getPart, label string) {
 		act := map[string]int{}
 		for _, v := range w.randNodes() {
 			for _, n := range part(v).Nodes {
@@ -242,30 +222,17 @@ func (w *World) plotInDegree() {
 			}
 		}
 
-		max := 0
+		h := w.stats[label]
+
 		for _, inDegree := range act {
-			if inDegree > max {
-				max = inDegree
-			}
+			h.inc(inDegree)
 		}
 
-		deg := make([]int, max+1)
-		for _, inDegree := range act {
-			deg[inDegree] += 1
-		}
-
-		f, _ := os.Create(path)
-		defer f.Close()
-		for inDegree, peers := range deg {
-			if peers == 0 {
-				continue
-			}
-			f.WriteString(fmt.Sprintf("%d %d\n", inDegree, peers))
-		}
+		h.plot(w.plotPath(label))
 	}
 
-	plot(activePart, w.plotPath("in-active"))
-	plot(passivePart, w.plotPath("in-passive"))
+	plot(activePart, "in_degree_active")
+	plot(passivePart, "in_degree_passive")
 }
 
 type gossipRound struct {
@@ -297,7 +264,7 @@ func (w *World) traceRound(app int) {
 		waste: waste - tot.waste,
 		maint: w.totalMessages - tot.maint,
 	}
-	tot.miss = rnd.miss
+	tot.miss += rnd.miss
 	tot.seen += rnd.seen
 	tot.waste += rnd.waste
 	tot.maint += rnd.maint

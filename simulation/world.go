@@ -11,6 +11,7 @@ type World struct {
 	config        *WorldConfig
 	nodes         map[string]*Client
 	morgue        map[string]*Client
+	stats         histograms
 	bootstrap     h.Node
 	totalMessages int
 	totalPayloads int
@@ -23,12 +24,12 @@ type World struct {
 }
 
 type WorldConfig struct {
-	gossips     int
-	peers       int
-	mortality   int
-	payloads    int
-	iteration   int // count rounds for plot filenames
-	failureRate int
+	seed           int64
+	gossipMessages int
+	peers          int
+	mortality      int
+	iteration      int // count rounds for plot filenames
+	failureRate    int
 }
 
 func (w *World) get(id string) *Client {

@@ -15,6 +15,13 @@
 
 See =data= for the data input. Plotting output is in =plot=
 
+** Plotting the Output
+
+The go simulation layer prints nodes in as dot files, which can be
+visualized with graphviz. Other metrics are printed as histograms in
+directories by world. Histograms are also aggregated at the top level
+of the =data= output directory.
+
 ** Known bugs
 
 - The simulation consistently shows a number of asymmetric links,

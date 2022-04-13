@@ -1,0 +1,10 @@
+#!/bin/sh
+graph=$1; shift
+data=$1; shift
+count=$1; shift
+
+set -x
+for i in `seq 1 $count`; do
+    n=`printf "%05d" $i`
+    ./bin/plot-$graph "data/$n/$data" > "data/$n/$data.png"
+done

@@ -3,7 +3,6 @@ package simulation
 import (
 	"fmt"
 	"math"
-	"math/rand"
 	"os"
 	"strconv"
 	"testing"
@@ -13,49 +12,49 @@ import (
 
 // TestSimulation is the test entry point
 func TestSimulation(t *testing.T) {
-	peers, count := 1000, 1
-	conv, err := strconv.Atoi(os.Getenv("SIMULATION_COUNT"))
-	if err == nil {
-		count = conv
+	count := envInt("SIMULATION_COUNT", 5)
+	config := WorldConfig{
+		peers:          envInt("SIMULATION_PEERS", 1000),
+		failureRate:    envInt("SIMULATION_NETWORK_FAILURE_PERCENT", 5),
+		mortality:      envInt("SIMULATION_NODE_FAILURE_PERCENT", 5),
+		gossipMessages: envInt("SIMULATION_MESSAGES", 200),
 	}
 
-	conv, err = strconv.Atoi(os.Getenv("SIMULATION_PEERS"))
-	if err == nil {
-		peers = conv
-	}
-
-	var seed int64
-	envSeed, err := strconv.ParseInt(os.Getenv("SIMULATION_SEED"), 10, 64)
-	if err == nil {
-		seed = envSeed
-	}
+	totalStats := newStats()
 
 	for i := 1; i <= count; i++ {
-		if envSeed == 0 {
-			seed = h.Rint64Crypto(math.MaxInt64 - 1)
-		}
-
-		testSimulation(t, i, peers, seed)
+		config.seed = envInt64("SIMULATION_SEED", h.Rint64Crypto(math.MaxInt64-1))
+		config.iteration = i
+		w := testSimulation(t, config)
+		totalStats.add(w.stats)
 	}
+
+	totalStats.plot("../data")
+}
+
+func envInt(variable string, otherwise int) int {
+	return int(envInt64(variable, int64(otherwise)))
+}
+
+func envInt64(variable string, otherwise int64) int64 {
+	conv, err := strconv.ParseInt(os.Getenv(variable), 10, 64)
+	if err != nil {
+		conv = otherwise
+	}
+	return conv
 }
 
 // testSimulation is the entry point to test a single world
 // World configuration and assertion goes here
-func testSimulation(t *testing.T, i int, peers int, seed int64) {
-	rand.Seed(seed)
-	fmt.Printf("world: %d seed: %d peers: %d\n", i, seed, peers)
+func testSimulation(t *testing.T, config WorldConfig) *World {
+	fmt.Printf("world: %d seed: %d peers: %d\n", config.iteration, config.seed, config.peers)
 
-	w := simulation(WorldConfig{
-		peers:       peers,
-		payloads:    30,
-		iteration:   i,
-		failureRate: 10,
-		gossips:     200,
-	})
+	w := simulation(config)
+	w.stats = newStats()
 
 	err := w.Connected()
 	if err != nil {
-		t.Errorf("world %d: graph disconnected: %s", i, err.Error())
+		t.Errorf("world %d: graph disconnected: %s", config.iteration, err.Error())
 	}
 
 	// This isn't an error. It's useful for working on symmetry, but because of the
@@ -68,10 +67,27 @@ func testSimulation(t *testing.T, i int, peers int, seed int64) {
 	// w.debugQueue()
 	// w.plotPeer("n2375")
 	w.mkdir()
-	w.plotSeed(seed)
+	w.plotSeed(config.seed)
+
 	w.plotBootstrapCount()
 	w.plotInDegree()
 	w.plotOutDegree()
 	w.plotGossip()
 	w.plotGraphs()
+	w.stats.plot(w.dir())
+
+	return w
+}
+
+func newStats() histograms {
+	return newHistograms([]string{
+		"bootstrap",
+		"in_degree_active",
+		"in_degree_passive",
+		"out_degree_active",
+		"out_degree_passive",
+		// "hyparview_messages",
+		// "gossip_seen",
+		// "gossip_waste",
+	})
 }
