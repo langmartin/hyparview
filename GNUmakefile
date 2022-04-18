@@ -8,12 +8,10 @@ simulation: ## run the simulation test
 	mkdir -p data
 	go test -v ./simulation
 
-plot: ## make plots from simulation data
+plot: ## plot the normal output
 	mkdir -p plot
-	# ./bin/plot-all stacked degree $(SIMULATION_COUNT)
-	# ./bin/plot-stacked gossip $(SIMULATION_COUNT) > plot/gossip.png
 	./bin/plot-degree "In Degree" "in-active" $(SIMULATION_COUNT) > plot/in-degree.png
-	./bin/plot-all-gossip $(SIMULATION_COUNT)
+	./bin/plot-stacked $(SIMULATION_COUNT) > plot/gossip.png
 
 plot-slow: ## more plots, but these are slow
 	mkdir -p plot

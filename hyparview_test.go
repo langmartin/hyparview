@@ -5,6 +5,7 @@ import (
 	"math/rand"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -50,6 +51,32 @@ func testView(count int) (*Hyparview, []Node) {
 	ns := makeNodes(count)
 	hv := CreateView(newSliceSender(), ns[0], 0)
 	return hv, ns
+}
+
+func TestConfiguration(t *testing.T) {
+	// Settings in the paper
+	ns := makeNodes(10000)
+	hv := CreateView(newSliceSender(), ns[0], 10000)
+	assert.Equal(t, 5, hv.Active.Max)
+	assert.Equal(t, 3, hv.Config.ShuffleActive)
+	assert.Equal(t, 30, hv.Passive.Max)
+	assert.Equal(t, 4, hv.Config.ShufflePassive)
+
+	assert.Equal(t, 6, hv.Config.RWL.Active)
+	assert.Equal(t, 3, hv.Config.RWL.Passive)
+	assert.Equal(t, 6, hv.Config.RWL.Shuffle)
+
+	// Small network
+	ns = makeNodes(150)
+	hv = CreateView(newSliceSender(), ns[0], 150)
+	assert.Equal(t, 3, hv.Active.Max)
+	assert.Equal(t, 2, hv.Config.ShuffleActive)
+	assert.Equal(t, 18, hv.Passive.Max)
+	assert.Equal(t, 3, hv.Config.ShufflePassive)
+
+	assert.Equal(t, 4, hv.Config.RWL.Active)
+	assert.Equal(t, 2, hv.Config.RWL.Passive)
+	assert.Equal(t, 4, hv.Config.RWL.Shuffle)
 }
 
 func TestShuffleSend(t *testing.T) {

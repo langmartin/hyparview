@@ -1,5 +1,7 @@
 package hyparview
 
+import "math"
+
 type ConfigRandomWalkLength struct {
 	Active  int
 	Passive int
@@ -25,17 +27,20 @@ type Hyparview struct {
 // CreateView creates the view. Configuration is recommendations based on the cluster size
 // n. Does not start any process.
 func CreateView(s Send, self Node, n int) *Hyparview {
-	active := 5
-	passive := 30
+	active := int(math.Round(math.Log10(float64(n)))) + 1
+	passive := active * 6
+
+	activeShuffle := (active + 1) / 2
+	activeRWL := active + 1
 
 	return &Hyparview{
 		Config: Config{
-			ShuffleActive:  3,
-			ShufflePassive: 4,
+			ShuffleActive:  activeShuffle,
+			ShufflePassive: activeShuffle + 1,
 			RWL: ConfigRandomWalkLength{
-				Active:  6,
-				Passive: 3,
-				Shuffle: 6,
+				Active:  activeRWL,
+				Passive: activeRWL / 2,
+				Shuffle: activeRWL,
 			},
 		},
 		S:       s,

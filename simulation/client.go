@@ -22,7 +22,7 @@ type Client struct {
 
 func makeClient(w *World, addr string) *Client {
 	n := h.NewNode(addr)
-	v := h.CreateView(nil, n, 0)
+	v := h.CreateView(nil, n, w.config.peers)
 	c := &Client{
 		Hyparview: *v,
 		w:         w,

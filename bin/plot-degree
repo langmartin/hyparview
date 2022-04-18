@@ -11,6 +11,6 @@ set term png tiny
 
 
 file(n) = sprintf("data/%05d/%s", n, ARG2)
-file_lb(n) = sprintf("%05d/", n)
+file_lb(n) = sprintf("%05d/%s", n, ARG2)
 
-plot for [i = 1:ARG3] file(i) with lines
+plot for [i = 1:ARG3] file(i) with lines title file_lb(i)

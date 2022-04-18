@@ -9,9 +9,11 @@ set term png small
 set xlabel ARG1
 set ylabel "Messages"
 
-set logscale y 2
+# set logscale y 2
 set xrange [1:30]
-set yrange [0:100000]
+set yrange [0:1000]
 
 file(n) = sprintf("data/%05d/gossip", n)
+# title(n, head) = sprintf("%s %d", head, n)
+
 plot for [world=1:ARG1] for [col=2:4] file(world) using 1:col with lines title columnheader
