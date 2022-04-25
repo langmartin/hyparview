@@ -1,4 +1,4 @@
-module github.com/hashicorp/hyparview
+module github.com/langmartin/hyparview
 
 go 1.14
 
