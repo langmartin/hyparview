@@ -24,12 +24,13 @@ type World struct {
 }
 
 type WorldConfig struct {
-	seed           int64
-	gossipMessages int
-	peers          int
-	mortality      int
-	iteration      int // count rounds for plot filenames
-	failureRate    int
+	seed                int64
+	stabilizationRounds int
+	gossipMessages      int
+	peers               int
+	mortality           int
+	iteration           int // count rounds for plot filenames
+	failureRate         int
 }
 
 func (w *World) get(id string) *Client {

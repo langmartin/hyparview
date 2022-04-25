@@ -19,6 +19,7 @@ func TestSimulation(t *testing.T) {
 		mortality:      envInt("SIMULATION_NODE_FAILURE_PERCENT", 5),
 		gossipMessages: envInt("SIMULATION_MESSAGES", 200),
 	}
+	config.stabilizationRounds = config.peers / 10
 
 	totalStats := newStats()
 
